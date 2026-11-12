@@ -22,6 +22,7 @@ Then reload themes in Home Assistant (Developer tools > Actions > frontend.reloa
 the generated file. Standard library only, Python 3.9+.
 """
 import base64
+import math
 import sys
 from pathlib import Path
 
@@ -77,21 +78,76 @@ def flake_svg(alpha_gain, alpha_bias, size=180):
             f'<rect width="{size}" height="{size}" filter="url(#f)"/></svg>')
 
 
-S_PATH = "M47 13 C38 4 14 5 14 20 C14 35 46 29 46 45 C46 60 19 62 9 50"
+# The S spine, drawn upright in a 100 x 120 box centred on (50, 60). The first half runs from the top terminal to
+# the centre; the second half is the first turned 180 degrees about the centre, so the bowls match exactly and every
+# join is smooth (each joint's two control points are collinear with it).
+S_CENTRE = (50.0, 60.0)
+S_FIRST_HALF = [                       # cubic segments: (control 1, control 2, end); starts at S_START
+    ((76, 12), (59, 9.125), (47, 9.5)),  # top terminal curling up and over
+    ((31, 10), (19, 20), (19, 33)),      # top of the upper bowl, down the left side
+    ((19, 47), (33, 53), (50, 60)),      # into the spine, through the centre
+]
+S_START = (81, 22)
+S_SKEW = 14                            # italic lean, degrees
+S_CHROME_W, S_EDGE_W, S_RED_W, S_SHINE_W = 21, 16.6, 15, 3
+
+
+def s_segments():
+    turn = lambda p: (2 * S_CENTRE[0] - p[0], 2 * S_CENTRE[1] - p[1])
+    pts = [S_START] + [p for seg in S_FIRST_HALF for p in seg]           # P0 C C P1 C C P2 C C P3(centre)
+    second = [turn(p) for p in reversed(pts[:-1])]                       # centre -> ... -> turned start
+    pts += second
+    return pts[0], [tuple(pts[i:i + 3]) for i in range(1, len(pts), 3)]
+
+
+def s_path():
+    start, segs = s_segments()
+    return f"M{start[0]:g} {start[1]:g}" + "".join(
+        "C" + " ".join(f"{x:g} {y:g}" for x, y in seg) for seg in segs)
+
+
+def s_bounds(pad):
+    """Bounding box of the skewed spine (sampled), grown by pad on every side."""
+    start, segs = s_segments()
+    k = math.tan(math.radians(S_SKEW))
+    xs, ys, p0 = [], [], start
+    for c1, c2, p3 in segs:
+        for i in range(41):
+            t = i / 40
+            u = 1 - t
+            x = u ** 3 * p0[0] + 3 * u * u * t * c1[0] + 3 * u * t * t * c2[0] + t ** 3 * p3[0]
+            y = u ** 3 * p0[1] + 3 * u * u * t * c1[1] + 3 * u * t * t * c2[1] + t ** 3 * p3[1]
+            xs.append(x - k * (y - S_CENTRE[1]))
+            ys.append(y)
+        p0 = p3
+    return min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad
 
 
 def s_badge_svg():
-    """The grille's Chili Red S: italic, chrome-edged, with a highlight along the top of the stroke."""
+    """The grille's Chili Red S: italic, chrome-edged, a dark seam between chrome and red, and a soft highlight
+    down the middle of the stroke. The canvas and the shadow's filter region are sized from the shape itself, so
+    nothing (stroke ends, round caps, shadow) is clipped."""
+    shadow_dy, shadow_blur = 2.5, 2
+    x0, y0, x1, y1 = s_bounds(S_CHROME_W / 2 + shadow_dy + 3 * shadow_blur)
+    w, h = x1 - x0, y1 - y0
+    vb = f"{x0:.1f} {y0:.1f} {w:.1f} {h:.1f}"
+    grad = f'x1="0" y1="{y0:.1f}" x2="0" y2="{y1:.1f}" gradientUnits="userSpaceOnUse"'
     chrome = "".join(f'<stop offset="{i / (len(CHROME) - 1):.2f}" stop-color="{c}"/>' for i, c in enumerate(CHROME))
-    return ('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="72" viewBox="-4 0 64 72">'
-            f'<defs><linearGradient id="c" x1="0" y1="0" x2="0" y2="1">{chrome}</linearGradient>'
-            f'<linearGradient id="r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{mix(CHILI, "#ffffff", 0.25)}"/>'
-            f'<stop offset=".55" stop-color="{CHILI}"/><stop offset="1" stop-color="{mix(CHILI, "#000000", 0.35)}"/></linearGradient>'
-            '<filter id="d"><feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#000" flood-opacity=".45"/></filter></defs>'
-            '<g transform="translate(6 4) skewX(-14)" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#d)">'
-            f'<path d="{S_PATH}" stroke="url(#c)" stroke-width="13"/>'
-            f'<path d="{S_PATH}" stroke="url(#r)" stroke-width="8.5"/>'
-            f'<path d="{S_PATH}" stroke="#fff" stroke-opacity=".35" stroke-width="2" transform="translate(-.6 -1.4)"/>'
+    path = s_path()
+    cx, cy = S_CENTRE
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w / 2:.0f}" height="{h / 2:.0f}" viewBox="{vb}">'
+            f'<defs><linearGradient id="c" {grad}>{chrome}</linearGradient>'
+            f'<linearGradient id="r" {grad}><stop offset="0" stop-color="{mix(CHILI, "#ffffff", 0.22)}"/>'
+            f'<stop offset=".5" stop-color="{CHILI}"/><stop offset="1" stop-color="{mix(CHILI, "#000000", 0.32)}"/></linearGradient>'
+            f'<filter id="d" filterUnits="userSpaceOnUse" x="{x0:.1f}" y="{y0:.1f}" width="{w:.1f}" height="{h:.1f}">'
+            f'<feDropShadow dx="0" dy="{shadow_dy}" stdDeviation="{shadow_blur}" flood-color="#000" flood-opacity=".45"/></filter>'
+            f'<path id="s" d="{path}"/></defs>'
+            f'<g transform="translate({cx:g} {cy:g}) skewX(-{S_SKEW}) translate({-cx:g} {-cy:g})" fill="none" '
+            'stroke-linecap="round" stroke-linejoin="round">'
+            f'<use href="#s" stroke="url(#c)" stroke-width="{S_CHROME_W}" filter="url(#d)"/>'
+            f'<use href="#s" stroke="{mix(CHILI, "#000000", 0.55)}" stroke-opacity=".7" stroke-width="{S_EDGE_W}"/>'
+            f'<use href="#s" stroke="url(#r)" stroke-width="{S_RED_W}"/>'
+            f'<use href="#s" stroke="#fff" stroke-opacity=".28" stroke-width="{S_SHINE_W}"/>'
             '</g></svg>')
 
 
@@ -115,7 +171,7 @@ def page_background(dark, urls):
         stripes = bonnet_stripes(rgbs_alpha(STRIPE, 0.82), rgbs_alpha("#ffffff", 0.95))
     return ", ".join([
         f"{roof_gradient()} left 0 top var(--header-height, 56px) / 100% 5px no-repeat fixed",   # the ombre roof, just under the header
-        f"url('{urls['badge']}') right 28px bottom 22px / 46px auto no-repeat fixed",
+        f"url('{urls['badge']}') right 24px bottom 18px / 54px auto no-repeat fixed",
         f"url('{urls['flake']}') 0 0 / 180px 180px fixed",
         stripes,
         paint,
