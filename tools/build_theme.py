@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""Mini Cooper S theme for Home Assistant, after a 2022 MINI Cooper S in Island Blue with the Multitone roof.
+"""Mini Cooper S themes for Home Assistant, after the 2022 MINI Cooper S and its best-known paints.
 
 The car's details, and where each one goes:
-  - Island Blue metallic body       -> the page: a metallic blue sheen with flake
-  - Multitone (ombre) roof          -> the band under the header, and the strip along each card's top edge:
-                                       bright San Marino blue at the windshield, through deep blue, to Jet Black
-  - Black bonnet stripes, white pin -> two fixed stripes down the page, like looking over the bonnet
-  - Chili Red "S" grille badge      -> the primary/active color, and a chrome-edged S badge at the page's bottom right
+  - Body paint                      -> the page: a metallic sheen with flake
+  - Roof (Multitone, white, black   -> the band under the header, and the strip along each card's top edge
+    or Chili Red)
+  - Bonnet stripes and pinstripes   -> two fixed stripes down the page, like looking over the bonnet
+  - Chili Red "S" grille badge      -> the primary/active colour in every colourway (every Cooper S wears it), and a
+                                       chrome-edged S badge at the page's bottom right
   - Jet Black roof / piano trim     -> the header, sidebar and (dark mode) cards
   - Round LED halo headlights       -> rounder cards (20 px)
 
-Theme "Mini Cooper S": light (pale Island Blue, pearl cards) and dark (Island Blue at night, piano black cards).
+Themes (each has light and dark modes):
+  - "Mini Cooper S": Island Blue with the Multitone roof (the original; the name is kept so existing setups work).
+  - "Mini Cooper S British Racing Green", "... Chili Red", "... Midnight Black", "... Pepper White", "... Zesty Yellow".
+Colourways are the SCHEMES table below; add one there. Paint colours are matched by eye from photos, not official.
 
 The flake textures and the S badge are SVGs embedded as data URIs, so the theme is a single self-contained YAML
 file (HACS installs only the themes/ folder; there's nothing to copy into www/).
@@ -29,16 +33,60 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 THEME = REPO / "themes" / "mini_cooper_s.yaml"
 
-ISLAND = "#2f6690"          # Island Blue, mid tone
-ISLAND_HI = "#4d86b3"       # sun on the bonnet
-ISLAND_LO = "#173650"       # shadowed flank
-ROOF = ["#3d8fe3", "#2b62b8", "#1d2f63", "#11152a", "#0a0a0d"]   # windshield -> spoiler
-STRIPE = "#16181c"          # bonnet stripe
-PIN = "#eef2f6"             # white pinstripe
 CHILI = "#d72631"           # S badge
 CHILI_DARK = "#e23a44"      # S badge, lifted for dark backgrounds
 CHROME = ["#f4f6f8", "#a9b0b8", "#e3e7eb", "#7d858e"]
 JET = "#0b0c0f"
+STRIPE_BLACK = "#16181c"
+COOL_BLUE = "#4aa3ff"       # climate "cool" where the paint has no blue of its own
+
+ROOF_MULTITONE = ["#3d8fe3", "#2b62b8", "#1d2f63", "#11152a", "#0a0a0d"]   # windshield -> spoiler
+ROOF_WHITE = ["#ffffff", "#e4e8eb", "#f6f8f9", "#d5dbe0"]
+ROOF_BLACK = ["#3a3d44", "#16181c", "#0b0c0f"]
+ROOF_CHILI = ["#ee4a54", CHILI, "#a51b25"]
+
+# Island Blue's neutrals, tuned by hand (the other colourways derive theirs from a tint; see neutrals()).
+ISLAND_NEUTRALS = {
+    True: dict(card="#111419", text="#eef3f8", text2="#a7b6c6", border="rgba(255,255,255,.07)",
+               shadow="0 1px 0 rgba(255,255,255,.04) inset, 0 2px 4px rgba(0,0,0,.35), 0 14px 30px rgba(4,14,26,.45)",
+               sidebar="#0e1014", sidebar_text="#c3ccd6", sidebar_icon="#8f9aa6", sidebar_sel="#ffffff",
+               menu="#f2f5f8", divider="rgba(255,255,255,.09)", icon="#b9c6d3", code="#0c0e12", md_code="#1b2028",
+               scrollbar="#3a4552", card_glaze="rgba(255,255,255,.035)"),
+    False: dict(card="#f7f9fc", text="#0f2133", text2="#40566b", border="rgba(15,33,51,.10)",
+                shadow="0 1px 0 #fff inset, 0 1px 2px rgba(15,33,51,.10), 0 10px 24px rgba(15,33,51,.12)",
+                sidebar="#f3f6f9", sidebar_text="#3b4b5c", sidebar_icon="#5d6d7e", sidebar_sel="#0f2133",
+                menu="#0f2133", divider="rgba(15,33,51,.12)", icon="#3f5468", code="#eef2f6", md_code="#e7edf3",
+                scrollbar="#a9b7c5", card_glaze="rgba(255,255,255,.7)"),
+}
+
+# One row per colourway. paint = (highlight, mid, shadow) for each mode's page; stripe/pin = (dark, light) colour and
+# opacity; accent = (dark, light), also fans unless `fan` is set; flake = (dark, light) (alpha gain, bias); tint colours the derived neutrals.
+SCHEMES = [
+    dict(name="Mini Cooper S", paint_name="Island Blue", roof_name="Multitone roof",
+         dark=("#4d86b3", "#2f6690", "#173650"), light=("#eef4f9", "#cfdeeb", "#a9c3da"), roof=ROOF_MULTITONE,
+         stripe=((STRIPE_BLACK, .88), (STRIPE_BLACK, .82)), pin=(("#eef2f6", .7), ("#ffffff", .95)),
+         accent=("#3d8fe3", "#2b62b8"), fan="#3d8fe3", cool="#3d8fe3", flake=((6, -4.75), (6, -4.75)), neutrals=ISLAND_NEUTRALS),
+    dict(name="Mini Cooper S British Racing Green", paint_name="British Racing Green", roof_name="white roof",
+         dark=("#2f6b52", "#1a4a37", "#0b261c"), light=("#eef5f1", "#d3e4da", "#a9c8b6"), roof=ROOF_WHITE,
+         stripe=(("#eef1f3", .2), ("#ffffff", .9)), pin=(("#eef1f3", .45), ("#1a4a37", .45)),
+         accent=("#6cc59a", "#2e7d57"), cool=COOL_BLUE, flake=((6, -4.8), (5, -3.95)), tint="#1a4a37"),
+    dict(name="Mini Cooper S Chili Red", paint_name="Chili Red", roof_name="white roof",
+         dark=("#d8434c", "#a81c25", "#4a0b10"), light=("#f9e6e7", "#eab9bc", "#d17d83"), roof=ROOF_WHITE,
+         stripe=(("#eef1f3", .2), ("#ffffff", .9)), pin=(("#eef1f3", .45), ("#a81c25", .4)),
+         accent=("#e9edf0", "#59606a"), cool=COOL_BLUE, flake=((6, -4.8), (5, -3.95)), tint="#5a3b3d"),
+    dict(name="Mini Cooper S Midnight Black", paint_name="Midnight Black", roof_name="Chili Red roof",
+         dark=("#3a3e46", "#1d2026", "#0a0b0e"), light=("#f3f4f6", "#dfe2e6", "#c2c7cd"), roof=ROOF_CHILI,
+         stripe=((STRIPE_BLACK, .7), (STRIPE_BLACK, .82)), pin=((CHILI_DARK, .75), (CHILI, .85)),
+         accent=("#c7ccd3", "#5b6470"), cool=COOL_BLUE, flake=((6.5, -4.6), (5, -3.95)), tint="#2a3240"),
+    dict(name="Mini Cooper S Pepper White", paint_name="Pepper White", roof_name="black roof",
+         dark=("#62666d", "#3b3e44", "#1c1e22"), light=("#ffffff", "#eeefec", "#d6d8d4"), roof=ROOF_BLACK,
+         stripe=((STRIPE_BLACK, .85), (STRIPE_BLACK, .85)), pin=(("#ffffff", .45), ("#ffffff", .9)),
+         accent=("#9fb3c8", "#4f6378"), cool=COOL_BLUE, flake=((6, -4.75), (4, -3.3)), tint="#4a5058"),
+    dict(name="Mini Cooper S Zesty Yellow", paint_name="Zesty Yellow", roof_name="black roof",
+         dark=("#c4a514", "#7d6a08", "#2c2504"), light=("#fffbe2", "#f9ec9c", "#ecd24a"), roof=ROOF_BLACK,
+         stripe=((STRIPE_BLACK, .85), (STRIPE_BLACK, .85)), pin=((STRIPE_BLACK, 0), (STRIPE_BLACK, 0)),
+         accent=("#f2d230", "#8a6f00"), cool=COOL_BLUE, flake=((6, -4.75), (4, -3.3)), tint="#5a5230"),
+]
 
 
 def rgb(h):
@@ -59,9 +107,35 @@ def rgbs(h):
     return ", ".join(str(v) for v in rgb(h))
 
 
-def roof_gradient(angle="90deg"):
-    stops = ", ".join(f"{c} {round(i * 100 / (len(ROOF) - 1))}%" for i, c in enumerate(ROOF))
+def roof_gradient(roof, angle="90deg"):
+    stops = ", ".join(f"{c} {round(i * 100 / (len(roof) - 1))}%" for i, c in enumerate(roof))
     return f"linear-gradient({angle}, {stops})"
+
+
+def neutrals(tint, dark):
+    """Card, text, sidebar and chrome greys, warmed or cooled slightly towards the paint."""
+    if dark:
+        return dict(card=mix("#0f1013", tint, .06), text=mix("#f2f4f7", tint, .05), text2=mix("#aab0b8", tint, .15),
+                    border="rgba(255,255,255,.07)",
+                    shadow=f"0 1px 0 rgba(255,255,255,.04) inset, 0 2px 4px rgba(0,0,0,.35), "
+                           f"0 14px 30px rgba({rgbs(mix('#000000', tint, .2))},.45)",
+                    sidebar=mix("#0d0e11", tint, .04), sidebar_text=mix("#c6cbd1", tint, .1),
+                    sidebar_icon=mix("#8f959c", tint, .12), sidebar_sel="#ffffff", menu="#f2f5f8",
+                    divider="rgba(255,255,255,.09)", icon=mix("#bcc3cb", tint, .15), code=mix("#0c0d10", tint, .04),
+                    md_code=mix("#1c1f24", tint, .06), scrollbar=mix("#3a3f46", tint, .15),
+                    card_glaze="rgba(255,255,255,.035)")
+    ink = mix("#14171b", tint, .2)
+    return dict(card=mix("#f8f9fa", tint, .02), text=ink, text2=mix("#4a5058", tint, .2),
+                border=f"rgba({rgbs(ink)},.10)",
+                shadow=f"0 1px 0 #fff inset, 0 1px 2px rgba({rgbs(ink)},.10), 0 10px 24px rgba({rgbs(ink)},.12)",
+                sidebar=mix("#f4f5f7", tint, .03), sidebar_text=mix("#3d434a", tint, .15),
+                sidebar_icon=mix("#5f666e", tint, .15), sidebar_sel=ink, menu=ink, divider=f"rgba({rgbs(ink)},.12)",
+                icon=mix("#434a52", tint, .2), code=mix("#eff1f3", tint, .03), md_code=mix("#e8ebee", tint, .05),
+                scrollbar=mix("#aab0b7", tint, .15), card_glaze="rgba(255,255,255,.7)")
+
+
+def scheme_neutrals(sc, dark):
+    return sc["neutrals"][dark] if "neutrals" in sc else neutrals(sc["tint"], dark)
 
 
 # ---- SVG assets ----------------------------------------------------------------------------------------------------
@@ -162,17 +236,15 @@ def bonnet_stripes(stripe, pin, pin_w=2):
     return f"linear-gradient(90deg, {', '.join(stops)}) fixed"
 
 
-def page_background(dark, urls):
-    if dark:
-        paint = (f"radial-gradient(ellipse 120% 90% at 18% 0%, {ISLAND_HI} 0%, {ISLAND} 38%, {ISLAND_LO} 100%) fixed")
-        stripes = bonnet_stripes(rgbs_alpha(STRIPE, 0.88), rgbs_alpha(PIN, 0.7))
-    else:
-        paint = "radial-gradient(ellipse 120% 90% at 18% 0%, #eef4f9 0%, #cfdeeb 45%, #a9c3da 100%) fixed"
-        stripes = bonnet_stripes(rgbs_alpha(STRIPE, 0.82), rgbs_alpha("#ffffff", 0.95))
+def page_background(sc, dark, urls):
+    hi, mid, lo = sc["dark" if dark else "light"]
+    paint = f"radial-gradient(ellipse 120% 90% at 18% 0%, {hi} 0%, {mid} {38 if dark else 45}%, {lo} 100%) fixed"
+    (stripe, sa), (pin, pa) = sc["stripe"][0 if dark else 1], sc["pin"][0 if dark else 1]
+    stripes = bonnet_stripes(rgbs_alpha(stripe, sa), rgbs_alpha(pin, pa))
     return ", ".join([
-        f"{roof_gradient()} left 0 top var(--header-height, 56px) / 100% 5px no-repeat fixed",   # the ombre roof, just under the header
+        f"{roof_gradient(sc['roof'])} left 0 top var(--header-height, 56px) / 100% 5px no-repeat fixed",   # roof, under the header
         f"url('{urls['badge']}') right 24px bottom 18px / 54px auto no-repeat fixed",
-        f"url('{urls['flake']}') 0 0 / 180px 180px fixed",
+        f"url('{urls['flake' if dark else 'flake_light']}') 0 0 / 180px 180px fixed",
         stripes,
         paint,
     ])
@@ -182,64 +254,62 @@ def rgbs_alpha(h, a):
     return f"rgba({rgbs(h)}, {a})"
 
 
-def card_background(dark, urls):
-    base = "#111419" if dark else "#f7f9fc"
+def card_background(sc, dark, urls):
+    n = scheme_neutrals(sc, dark)
     return ", ".join([
-        f"{roof_gradient()} left top / 100% 4px no-repeat",
-        f"url('{urls['flake'] if dark else urls['flake_light']}') 0 0 / 180px 180px",
-        f"linear-gradient(180deg, {'rgba(255,255,255,.035)' if dark else 'rgba(255,255,255,.7)'}, transparent 60%)",
-        base,
+        f"{roof_gradient(sc['roof'])} left top / 100% 4px no-repeat",
+        f"url('{urls['card_flake'] if dark else urls['card_flake_light']}') 0 0 / 180px 180px",
+        f"linear-gradient(180deg, {n['card_glaze']}, transparent 60%)",
+        n["card"],
     ])
 
 
 # ---- variables -----------------------------------------------------------------------------------------------------
-def mode_vars(dark, urls):
+def mode_vars(sc, dark, urls):
+    n = scheme_neutrals(sc, dark)
     p = CHILI_DARK if dark else CHILI
-    card = "#111419" if dark else "#f7f9fc"
-    page = ISLAND_LO if dark else "#cfdeeb"
-    text = "#eef3f8" if dark else "#0f2133"
-    text2 = "#a7b6c6" if dark else "#40566b"
+    card, text, text2 = n["card"], n["text"], n["text2"]
+    page = sc["dark"][2] if dark else sc["light"][1]
+    accent = sc["accent"][0 if dark else 1]
     v = {
         "primary-color": p,
         "dark-primary-color": mix(p, "#000000", 0.25),
         "light-primary-color": mix(p, "#ffffff", 0.45),
-        "accent-color": ROOF[0] if dark else ROOF[1],
+        "accent-color": accent,
         "text-primary-color": "#ffffff",
         "primary-background-color": page,
         "secondary-background-color": mix(page, card, 0.5),
         "card-background-color": card,
-        "ha-card-background": card_background(dark, urls),
-        "ha-card-border-color": "rgba(255,255,255,.07)" if dark else "rgba(15,33,51,.10)",
+        "ha-card-background": card_background(sc, dark, urls),
+        "ha-card-border-color": n["border"],
         "ha-card-border-width": "1px",
         "ha-card-border-radius": "20px",
-        "ha-card-box-shadow": ("0 1px 0 rgba(255,255,255,.04) inset, 0 2px 4px rgba(0,0,0,.35), 0 14px 30px rgba(4,14,26,.45)"
-                               if dark else
-                               "0 1px 0 #fff inset, 0 1px 2px rgba(15,33,51,.10), 0 10px 24px rgba(15,33,51,.12)"),
+        "ha-card-box-shadow": n["shadow"],
         "ha-dialog-surface-background": card,
-        "lovelace-background": page_background(dark, urls),
+        "lovelace-background": page_background(sc, dark, urls),
         "app-header-background-color": JET,
         "app-header-text-color": "#f2f5f8",
         "app-header-border-bottom": "none",
         "app-header-edit-background-color": mix(JET, CHILI, 0.35),
         "app-header-edit-text-color": "#ffffff",
-        "sidebar-background-color": "#0e1014" if dark else "#f3f6f9",
-        "sidebar-text-color": "#c3ccd6" if dark else "#3b4b5c",
-        "sidebar-icon-color": "#8f9aa6" if dark else "#5d6d7e",
+        "sidebar-background-color": n["sidebar"],
+        "sidebar-text-color": n["sidebar_text"],
+        "sidebar-icon-color": n["sidebar_icon"],
         "sidebar-selected-icon-color": p,
-        "sidebar-selected-text-color": "#ffffff" if dark else "#0f2133",
-        "sidebar-menu-button-text-color": "#f2f5f8" if dark else "#0f2133",
+        "sidebar-selected-text-color": n["sidebar_sel"],
+        "sidebar-menu-button-text-color": n["menu"],
         "primary-text-color": text,
         "secondary-text-color": text2,
         "disabled-text-color": mix(text2, card, 0.45),
-        "divider-color": "rgba(255,255,255,.09)" if dark else "rgba(15,33,51,.12)",
-        "state-icon-color": "#b9c6d3" if dark else "#3f5468",
+        "divider-color": n["divider"],
+        "state-icon-color": n["icon"],
         "state-active-color": p,
         "state-switch-active-color": p,
         "state-input_boolean-active-color": p,
-        "state-fan-active-color": ROOF[0],
+        "state-fan-active-color": sc.get("fan", accent),        # Island Blue keeps one blue in both modes
         "state-light-active-color": "#ffd277" if dark else "#e7a31c",      # halo-white-warm, not red
         "state-climate-heat-color": "#ff8a3d",
-        "state-climate-cool-color": ROOF[0],
+        "state-climate-cool-color": sc["cool"],
         "switch-checked-color": p,
         "switch-checked-button-color": p,
         "switch-checked-track-color": p,
@@ -247,15 +317,15 @@ def mode_vars(dark, urls):
         "success-color": "#35c46b" if dark else "#23944f",
         "warning-color": "#ffb23e" if dark else "#b8700c",
         "error-color": "#ff6b4a" if dark else "#c43d1f",                   # orange-red, so it reads apart from the S red
-        "info-color": ROOF[0] if dark else ROOF[1],
-        "code-editor-background-color": "#0c0e12" if dark else "#eef2f6",
-        "markdown-code-background-color": "#1b2028" if dark else "#e7edf3",
+        "info-color": accent,
+        "code-editor-background-color": n["code"],
+        "markdown-code-background-color": n["md_code"],
         "data-table-background-color": card,
-        "scrollbar-thumb-color": "#3a4552" if dark else "#a9b7c5",
-        "mini-island-blue": ISLAND,
-        "mini-roof-gradient": roof_gradient(),
+        "scrollbar-thumb-color": n["scrollbar"],
+        "mini-paint-color": sc["dark"][1],
+        "mini-roof-gradient": roof_gradient(sc["roof"]),
         "mini-chili-red": CHILI,
-        "graph-color-1": ROOF[0] if dark else ROOF[1],
+        "graph-color-1": accent,
         "graph-color-2": p,
         "graph-color-3": "#ffb23e",
         "graph-color-4": "#9fb3c8",
@@ -264,7 +334,7 @@ def mode_vars(dark, urls):
         "graph-color-7": "#b07cff",
         "graph-color-8": "#2ec4b6",
         "mdc-theme-primary": p,
-        "mdc-theme-secondary": ROOF[0],
+        "mdc-theme-secondary": sc.get("fan", accent),
     }
     for step, t in ((5, -0.85), (10, -0.75), (20, -0.55), (30, -0.3), (40, -0.12), (50, 0.0), (60, 0.2), (70, 0.4),
                     (80, 0.6), (90, 0.8), (95, 0.9)):
@@ -285,13 +355,18 @@ def data_uri(svg):
 
 
 def build():
-    urls = {"flake": data_uri(flake_svg(6, -4.75)), "flake_light": data_uri(flake_svg(5, -3.95)),
-            "badge": data_uri(s_badge_svg())}
-    return ("# Generated by tools/build_theme.py (https://github.com/edwork/mini-cooper-s-theme).\n"
-            "# Edit the generator, not this file.\n"
-            "# 2022 MINI Cooper S: Island Blue, Multitone roof, black bonnet stripes, Chili Red S.\n"
-            '"Mini Cooper S":\n  modes:\n    light:\n' + block(mode_vars(False, urls), 6)
-            + "    dark:\n" + block(mode_vars(True, urls), 6))
+    badge = data_uri(s_badge_svg())
+    out = ["# Generated by tools/build_theme.py (https://github.com/edwork/mini-cooper-s-theme).\n",
+           "# Edit the generator, not this file.\n",
+           "# 2022 MINI Cooper S colourways: paint, roof, bonnet stripes, and the Chili Red S.\n"]
+    for sc in SCHEMES:
+        (dg, db), (lg, lb) = sc["flake"]
+        urls = {"badge": badge, "flake": data_uri(flake_svg(dg, db)), "flake_light": data_uri(flake_svg(lg, lb)),
+                "card_flake": data_uri(flake_svg(6, -4.75)), "card_flake_light": data_uri(flake_svg(5, -3.95))}
+        out.append(f"# {sc['name']}: {sc['paint_name']}, {sc['roof_name']}.\n"
+                   f'"{sc["name"]}":\n  modes:\n    light:\n' + block(mode_vars(sc, False, urls), 6)
+                   + "    dark:\n" + block(mode_vars(sc, True, urls), 6))
+    return "".join(out)
 
 
 def main():
@@ -302,7 +377,7 @@ def main():
         print(f"{THEME.relative_to(REPO)} is up to date")
         return
     THEME.write_text(text)
-    print(f"wrote {THEME.relative_to(REPO)} ({len(text) // 1024} KB)")
+    print(f"wrote {THEME.relative_to(REPO)} ({len(text) // 1024} KB, {len(SCHEMES)} themes)")
 
 
 if __name__ == "__main__":

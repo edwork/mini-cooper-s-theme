@@ -4,26 +4,60 @@
 [![Validate](https://github.com/edwork/mini-cooper-s-theme/actions/workflows/validate.yml/badge.svg)](https://github.com/edwork/mini-cooper-s-theme/actions/workflows/validate.yml)
 [![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=edwork&repository=mini-cooper-s-theme&category=theme)
 
-A Home Assistant theme after a 2022 MINI Cooper S in Island Blue with the Multitone roof: metallic blue paint,
-the blue-to-black roof fade, black bonnet stripes and the red S badge. It has light and dark modes.
+Home Assistant themes after the 2022 MINI Cooper S: metallic paint, the roof, bonnet stripes and the red S badge.
+There are six colourways, each with light and dark modes.
 
-![Mini Cooper S in dark mode](docs/images/preview-dark.webp)
+![Mini Cooper S (Island Blue) in dark mode](docs/images/preview-dark.webp)
 
-![Mini Cooper S in light mode](docs/images/preview-light.webp)
+![All six colourways in dark mode](docs/images/colourways-dark.webp)
+
+![All six colourways in light mode](docs/images/colourways-light.webp)
+
+<details>
+<summary>Each colourway at full size</summary>
+
+![Island Blue, light mode](docs/images/preview-light.webp)
+![British Racing Green, dark mode](docs/images/british-racing-green-dark.webp)
+![British Racing Green, light mode](docs/images/british-racing-green-light.webp)
+![Chili Red, dark mode](docs/images/chili-red-dark.webp)
+![Chili Red, light mode](docs/images/chili-red-light.webp)
+![Midnight Black, dark mode](docs/images/midnight-black-dark.webp)
+![Midnight Black, light mode](docs/images/midnight-black-light.webp)
+![Pepper White, dark mode](docs/images/pepper-white-dark.webp)
+![Pepper White, light mode](docs/images/pepper-white-light.webp)
+![Zesty Yellow, dark mode](docs/images/zesty-yellow-dark.webp)
+![Zesty Yellow, light mode](docs/images/zesty-yellow-light.webp)
+
+</details>
+
+## Themes
+
+| Theme | Paint | Roof | Bonnet stripes |
+|---|---|---|---|
+| **Mini Cooper S** | Island Blue | Multitone (blue fading to black) | black, white pinstripe |
+| **Mini Cooper S British Racing Green** | British Racing Green | white | white |
+| **Mini Cooper S Chili Red** | Chili Red | white | white |
+| **Mini Cooper S Midnight Black** | Midnight Black | Chili Red | black, red pinstripe |
+| **Mini Cooper S Pepper White** | Pepper White | black | black |
+| **Mini Cooper S Zesty Yellow** | Zesty Yellow | black | black |
+
+Every colourway has light and dark modes and follows your light/dark setting. The Chili Red S is the "on" colour in
+all of them, as it's on the grille of every Cooper S. The paint colours are matched by eye from photos; they aren't
+official paint codes.
 
 ## Design
 
 | On the car | In the theme |
 |---|---|
-| Island Blue metallic paint | The page: a blue sheen with metallic flake |
-| Multitone roof, bright blue at the windshield fading to Jet Black | A band under the header and a strip along the top of every card |
-| Black bonnet stripes with a white pinstripe | Two stripes down the page, like looking over the bonnet |
+| Metallic paint | The page: a sheen of the paint colour with metallic flake |
+| The roof (or the Multitone fade, bright blue at the windshield to Jet Black) | A band under the header and a strip along the top of every card |
+| Bonnet stripes and pinstripes | Two stripes down the page, like looking over the bonnet |
 | Chili Red S on the grille | The primary colour for anything that's on, and an S badge in the bottom-right corner |
 | Jet Black roof and piano-black trim | The header and sidebar, and the cards in dark mode |
 | Round LED headlights | Rounder, 20 px cards |
 
-Light mode uses pale Island Blue with pearl cards; dark mode is Island Blue at night with piano-black cards. Error
-colours are orange-red, so they read apart from the S red.
+Light mode uses a pale wash of the paint with pearl cards; dark mode is the paint at night with piano-black cards.
+Error colours are orange-red, so they read apart from the S red.
 
 It's plain theme variables: no card-mod or other add-ons needed. The flake and the badge are SVGs embedded in the
 theme file, so there's nothing to copy into `www/`.
@@ -49,14 +83,15 @@ frontend:
 
 ## Usage
 
-- **Your profile:** your user (bottom left) → **Theme** → **Mini Cooper S**. It follows your light/dark setting.
-- **One view:** edit the view → **Theme**, or `theme: Mini Cooper S` in YAML. A view theme styles the view's
+- **Your profile:** your user (bottom left) → **Theme** → any of the six. They follow your light/dark setting.
+- **One view:** edit the view → **Theme**, or `theme: Mini Cooper S Chili Red` in YAML. A view theme styles the view's
   content; the header and sidebar keep your profile theme.
 
 ## Customising
 
-`themes/mini_cooper_s.yaml` is generated, so don't edit it by hand. The paint colours (body, roof stops, stripe,
-pinstripe, badge) are constants at the top of [`tools/build_theme.py`](tools/build_theme.py). Change them and run:
+`themes/mini_cooper_s.yaml` is generated, so don't edit it by hand. Each colourway is a row in the `SCHEMES` table in
+[`tools/build_theme.py`](tools/build_theme.py): paint shades for each mode, roof, stripe and pinstripe colours, accent
+and flake. Add your own car's paint there and run:
 
 ```sh
 python3 tools/build_theme.py            # regenerate themes/mini_cooper_s.yaml
