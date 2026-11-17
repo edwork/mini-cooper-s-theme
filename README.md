@@ -1,6 +1,6 @@
 # Mini Cooper S
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz)
 [![Validate](https://github.com/edwork/mini-cooper-s-theme/actions/workflows/validate.yml/badge.svg)](https://github.com/edwork/mini-cooper-s-theme/actions/workflows/validate.yml)
 [![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=edwork&repository=mini-cooper-s-theme&category=theme)
 
@@ -64,11 +64,15 @@ theme file, so there's nothing to copy into `www/`.
 
 ## Installation
 
-### HACS
+### HACS (Marketplace)
 
-1. HACS → ⋮ → **Custom repositories**. Add `https://github.com/edwork/mini-cooper-s-theme` with type **Theme**.
-2. Search for **Mini Cooper S**, then **Download**.
-3. Run the **Home Assistant Frontend: Reload themes** action (`frontend.reload_themes`), or restart.
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=edwork&repository=mini-cooper-s-theme&category=theme)
+
+1. Open HACS, search for **Mini Cooper S**, then **Download**.
+2. Run the **Home Assistant Frontend: Reload themes** action (`frontend.reload_themes`), or restart.
+
+If it doesn't show up in search, add it as a custom repository: HACS → ⋮ → **Custom repositories**,
+add `https://github.com/edwork/mini-cooper-s-theme` with type **Theme**, then search again.
 
 ### Manual
 
